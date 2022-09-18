@@ -1,0 +1,95 @@
+workflows:
+    ios-ftl-fetch-signing-files:
+      name: iOS tests in Firebase Test Lab (fetch signing files)
+      instance_type: mac_mini_m1
+      environment:
+        xcode: 13.3.1
+        groups:
+          - ios_credentials
+          - gcloud_credentials
+      scripts:
+        - name: Configure Firebase access
+          script: |
+            set -e
+            echo $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS > ./gcloud_key_file.json          
+            gcloud auth activate-service-account --key-file=gcloud_key_file.json
+            gcloud --quiet config set project ios-testing-3bbef
+
+        - keychain initialize
+        - app-store-connect fetch-signing-files "com.example.ftlApp"
+        - keychain add-certificates
+        - xcode-project use-profiles
+
+        - name: Build app for testing
+          script: |
+            set -ex
+
+            flutter build ios integration_test/app_test.dart --release
+
+            cd ios
+            xcodebuild \
+              -workspace Runner.xcworkspace \
+              -scheme Runner \
+              -config Flutter/Release.xcconfig \
+              -derivedDataPath "../build/ios_integ" \
+              -sdk iphoneos \
+              build-for-testing
+        - name: Package tests bundle
+          script: |
+            set -ex
+            cd ./build/ios_integ/Build/Products
+            zip -r "ios_tests.zip" *-iphoneos *.xctestrun
+- name: Run tests in Firebase Test Lab
+          script: gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip"
+            
+      artifacts:
+        - "**/ios_tests.zip"
+
+    ios-ftl-cm-signing-files:
+      name: iOS tests in Firebase Test Lab (CM team signing files)
+      instance_type: mac_mini_m1
+      environment:
+        xcode: 13.3.1
+        groups:
+          - gcloud_credentials
+        ios_signing:
+          provisioning_profiles:
+            - wildcard_development_profile
+          certificates:
+            - ios_development_cert
+
+      scripts:
+        - name: Configure Firebase access
+          script: |
+            set -e
+            echo $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS > ./gcloud_key_file.json          
+            gcloud auth activate-service-account --key-file=gcloud_key_file.json
+            gcloud --quiet config set project ios-testing-3bbef
+
+        - xcode-project use-profiles --code-signing-setup-verbose-logging
+
+        - name: Build app for testing
+          script: |
+            set -ex
+
+            flutter build ios integration_test/app_test.dart --release
+
+            cd ios
+            xcodebuild \
+              -workspace Runner.xcworkspace \
+              -scheme Runner \
+              -config Flutter/Release.xcconfig \
+              -derivedDataPath "../build/ios_integ" \
+              -sdk iphoneos \
+              build-for-testing
+        - name: Package tests bundle
+          script: |
+            set -ex
+            cd ./build/ios_integ/Build/Products
+            zip -r "ios_tests.zip" *-iphoneos *.xctestrun
+- name: Run tests in Firebase Test Lab
+          script: gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip"
+            
+      artifacts:
+        - "**/ios_tests.zip"
+
