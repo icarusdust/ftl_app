@@ -19,6 +19,7 @@ workflows:
 
         - keychain initialize
         - app-store-connect fetch-signing-files $BUNDLE_ID --create
+        - app-store-connect fetch-signing-files "com.testlab.uitest.RunnerTests.xctrunner" --create
         - keychain add-certificates
         - xcode-project use-profiles
 
