@@ -3,6 +3,8 @@ workflows:
       name: iOS tests in Firebase Test Lab (fetch signing files)
       instance_type: mac_mini_m1
       environment:
+        vars:
+          BUNDLE_ID: "com.example.ftlApp"
         xcode: 13.3.1
         groups:
           - ios_credentials
@@ -16,7 +18,7 @@ workflows:
             gcloud --quiet config set project ios-testing-3bbef
 
         - keychain initialize
-        - app-store-connect fetch-signing-files "com.example.ftlApp"
+        - app-store-connect fetch-signing-files $BUNDLE_ID
         - keychain add-certificates
         - xcode-project use-profiles
 
