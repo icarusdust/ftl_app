@@ -1,7 +1,7 @@
 workflows:
     ios-ftl-fetch-signing-files:
       name: iOS tests in Firebase Test Lab (fetch signing files)
-      instance_type: mac_pro
+      instance_type: mac_mini_m1
       environment:
         vars:
           BUNDLE_ID: "com.example.ftlApp"
