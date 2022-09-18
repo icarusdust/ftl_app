@@ -25,10 +25,8 @@ workflows:
 
         - name: Build app for testing
           script: |
-                  set -ex
-
+            set -ex
             flutter build ios integration_test/app_test.dart --release
-
             cd ios
             xcodebuild \
               -workspace Runner.xcworkspace \
