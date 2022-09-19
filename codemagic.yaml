@@ -33,16 +33,16 @@ workflows:
               -workspace Runner.xcworkspace \
               -scheme Runner \
               -config Flutter/Release.xcconfig \
-              -derivedDataPath "../build/ios_integ" \
+              -derivedDataPath "./build/ios_integ" \
               -sdk iphoneos \
               build-for-testing
         - name: Package tests bundle
           script: |
             set -ex
-            cd ./build/ios_integ/Build/Products
+            cd $CM_BUILD_DIR/ios/build/ios_integ/Build/Products
             zip -r "ios_tests.zip" *-iphoneos *.xctestrun
         - name: Run tests in Firebase Test Lab
-          script: gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip"
+          script: gcloud firebase test ios run --test "$CM_BUILD_DIR/ios/build/ios_integ/Build/Products/ios_tests.zip"
             
       artifacts:
         - "**/ios_tests.zip"
