@@ -5,7 +5,7 @@ workflows:
       environment:
         vars:
           BUNDLE_ID: "com.example.ftlApp"
-        xcode: 13.3.1
+        xcode: 14.0
         groups:
           - ios_credentials
           - gcloud_credentials
